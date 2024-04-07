@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
 
 const eventSchema = new mongoose.Schema(
   {
@@ -9,6 +10,10 @@ const eventSchema = new mongoose.Schema(
       trim: true,
       minLength: [1, ["Name cannot less than 1 character"]],
       maxLength: [20, ["Name cannot be more than 20 characters"]],
+    },
+    slug: String,
+    dateAvailable: {
+      type: [Date],
     },
     ratingSQuantity: {
       type: Number,
@@ -43,6 +48,10 @@ const eventSchema = new mongoose.Schema(
       type: Array,
       required: true,
     },
+    handleEmergency: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -50,5 +59,10 @@ const eventSchema = new mongoose.Schema(
   },
 );
 
+eventSchema.pre("save", function (next) {
+  if (!this.isModified("name")) return next();
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
 const Event = mongoose.model("Event", eventSchema);
 export default Event;
