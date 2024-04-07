@@ -1,9 +1,18 @@
-import dotenv from "dotenv";
 import app from "./app.js";
+import { getDbUrl, PORT } from "./utils/utils.js";
+import mongoose from "mongoose";
 
-dotenv.config({ path: "./config.env" });
+(async () => {
+  try {
+    const dbUrl = await getDbUrl({ useLocalDb: true });
+    await mongoose.connect(dbUrl);
+    console.log("MongoDB connected successfully");
+  } catch (e) {
+    console.error("Error connecting to MongoDB:", e.message);
+  }
+})();
 
-const port = process.env.PORT || 4000;
+const port = PORT || 3000;
 app.listen(port, () => {
   console.log(`Listening to request on port ${port}`);
 });
