@@ -3,7 +3,7 @@ import { v4 } from "uuid";
 
 dotenv.config({ path: "./config.env" });
 
-export const { DATABASE, DATABASE_LOCAL, DATABASE_PASSWORD, PORT, NOD_ENV } =
+export const { DATABASE, DATABASE_LOCAL, DATABASE_PASSWORD, PORT, NODE_ENV } =
   process.env;
 
 export async function uuidV4() {
