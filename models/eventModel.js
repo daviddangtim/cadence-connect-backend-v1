@@ -6,10 +6,14 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true,
+      minLength: [1, ["Name cannot less than 1 character"]],
+      maxLength: [20, ["Name cannot be more than 20 characters"]],
     },
     ratingSQuantity: {
       type: Number,
       default: 0,
+      min: [0, "Ratings quantity cannot be less than 0"],
     },
     ratingsAverage: {
       type: Number,
@@ -19,11 +23,17 @@ const eventSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: true,
+      trim: true,
+      required: [true, "An event must have a description"],
+      minLength: [50, "Description cannot be less than 50 characters long"],
+      maxLength: [150, "Description cannot be more than 150 characters long"],
     },
     summary: {
       type: String,
+      trim: true,
       required: [true, "An event must a summary"],
+      minLength: [20, "Summary cannot be less than 20 characters long"],
+      maxLength: [100, "Summary cannot be more than 100 characters long"],
     },
     location: {
       type: Number,
@@ -39,3 +49,6 @@ const eventSchema = new mongoose.Schema(
     virtuals: true,
   },
 );
+
+const Event = mongoose.model("Event", eventSchema);
+export default Event;
