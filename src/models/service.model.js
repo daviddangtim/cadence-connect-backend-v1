@@ -26,6 +26,11 @@ const serviceSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    imageCover: {
+      type: String,
+      required: [true, "A service must have a cover image"],
+    },
+    images: [String],
     location: {
       type: locationSchema,
       required: true,
@@ -38,16 +43,16 @@ const serviceSchema = new mongoose.Schema(
       minlength: [1, "Name cannot be less than 1 character"],
       maxlength: [40, "Name cannot be more than 40 characters"],
     },
-    ratingsQuantity: {
-      type: Number,
-      default: 0,
-      min: [0, "Rating quantity cannot be less than 0"],
-    },
     ratingsAverage: {
       type: Number,
       default: 5,
       min: [1, "Rating cannot be less than 1"],
       max: [5, "Rating cannot be more than 5"],
+    },
+    ratingsQuantity: {
+      type: Number,
+      default: 0,
+      min: [0, "Rating quantity cannot be less than 0"],
     },
     slug: String,
     summary: {

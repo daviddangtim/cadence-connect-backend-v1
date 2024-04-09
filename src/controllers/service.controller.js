@@ -1,23 +1,28 @@
 import Service from "../models/service.model.js";
+import catchAsync from "../utils/catch.async.js";
 
-export async function createService(req, res) {
-  try {
-    const newService = await Service.create(req.body);
-    res.status(201).json({
-      status: "success",
-      data: { newService },
-    });
-  } catch (e) {
-    res.status(400).json({
-      status: "fail",
-      message: "Invalid data sent " + e.message,
-    });
-  }
-}
-export async function getService(req, res) {}
-export async function updateService(req, res) {}
-export async function deleteService(req, res) {}
-export async function getAllServices(req, res) {}
-export async function getAllServicesByRating(req, res, next) {}
-export async function getAllServicesByEmergencyStatus(req, res, next) {}
-export async function getAllCacVerifiedServices(req, res, next) {}
+export const createService = catchAsync(async (req, res, next) => {
+  const newService = await Service.create(req.body);
+  res.status(201).json({
+    status: "success",
+    data: { newService },
+  });
+});
+
+export const getService = catchAsync(async (req, res) => {
+  const service = await Service.findById(req.params.id);
+  res.status(200).json({
+    status: "success",
+    data: { service },
+  });
+});
+export const updateService = catchAsync(async (req, res) => {});
+export const deleteService = catchAsync(async (req, res) => {});
+export const getAllServices = catchAsync(async (req, res) => {});
+export const getAllServicesByRating = catchAsync(async (req, res, next) => {});
+export const getAllServicesByEmergencyStatus = catchAsync(
+  async (req, res, next) => {},
+);
+export const getAllCacVerifiedServices = catchAsync(
+  async (req, res, next) => {},
+);
