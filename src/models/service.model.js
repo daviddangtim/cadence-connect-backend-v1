@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import slugify from "slugify";
+import locationSchema from "./schemas/location.schema.js";
 
 const serviceSchema = new mongoose.Schema(
   {
@@ -11,31 +12,31 @@ const serviceSchema = new mongoose.Schema(
       type: Array,
       required: [true, "A service must have a category"],
     },
-    dateAvailable: {
+    datesAvailable: {
       type: [Date],
     },
     description: {
       type: String,
       trim: true,
       required: [true, "A service must have a description"],
-      minLength: [400, "Description cannot be less than 400 characters long"],
-      maxLength: [1000, "Description cannot be more than 1000 characters long"],
+      minlength: [200, "Description cannot be less than 400 characters long"],
+      maxlength: [800, "Description cannot be more than 1000 characters long"],
     },
     handleEmergency: {
       type: Boolean,
       default: false,
     },
     location: {
-      type: Number,
-      required: [true, "A service Must have a location"],
+      type: locationSchema,
+      required: true,
     },
     name: {
       type: String,
       required: true,
       unique: true,
       trim: true,
-      minLength: [1, ["Name cannot be less than 1 character"]],
-      maxLength: [40, ["Name cannot be more than 40 characters"]],
+      minlength: [1, "Name cannot be less than 1 character"],
+      maxlength: [40, "Name cannot be more than 40 characters"],
     },
     ratingsQuantity: {
       type: Number,
@@ -53,8 +54,8 @@ const serviceSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: [true, "A service must have a summary"],
-      minLength: [200, "Summary cannot be less than 200 characters long"],
-      maxLength: [500, "Summary cannot be more than 100 characters long"],
+      minlength: [150, "Summary cannot be less than 200 characters long"],
+      maxlength: [300, "Summary cannot be more than 500 characters long"],
     },
   },
   {
@@ -68,5 +69,7 @@ serviceSchema.pre("save", function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
-const Event = mongoose.model("Service", serviceSchema);
-export default Event;
+
+serviceSchema.index({ location: "2dsphere" });
+const Service = mongoose.model("Service", serviceSchema);
+export default Service;
