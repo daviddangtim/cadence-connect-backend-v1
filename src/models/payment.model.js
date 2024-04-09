@@ -14,16 +14,16 @@ const paymentSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: true,
+      required: [true, "A payment must have a price"],
     },
-    receiver: {
+    receiverId: {
       type: String,
-      required: true,
+      required: [true, "A payment must have a receiver"],
       trim: true,
     },
     senderId: {
       type: String,
-      required: true,
+      required: [true, "A payment must have a sender"],
       trim: true,
     },
     status: {
@@ -33,7 +33,7 @@ const paymentSchema = new mongoose.Schema(
     },
     paymentType: {
       type: String,
-      required: true,
+      required: [true, "A payment must have a payment type"],
       enum: ["cadenceSavings", "eventPayment"],
     },
   },

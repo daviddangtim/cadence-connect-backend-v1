@@ -1,5 +1,5 @@
 import app from "./app.js";
-import { getDbUrl, PORT } from "./utils/utils.js";
+import { getDbUrl, PORT } from "./src/utils/utils.js";
 import mongoose from "mongoose";
 
 (async () => {
