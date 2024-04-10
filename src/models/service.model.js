@@ -35,6 +35,26 @@ const serviceSchema = new mongoose.Schema(
       type: locationSchema,
       required: true,
     },
+    maxBudget: {
+      type: Number,
+      required: [true, "A service must have a maxBudget"],
+      validate: {
+        validator: function (value) {
+          return value > this.minBudget;
+        },
+        message: `The maxBudget: {VALUE} cannot be less than or equal to minBudget`,
+      },
+    },
+    minBudget: {
+      type: Number,
+      required: [true, "A service must have a minBudget"],
+      validate: {
+        validator: function (value) {
+          return value < this.maxBudget;
+        },
+        message: `The minBudget: {VALUE} cannot greater than or equal to maxBudget`,
+      },
+    },
     name: {
       type: String,
       required: true,
