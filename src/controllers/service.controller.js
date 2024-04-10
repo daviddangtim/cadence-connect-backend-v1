@@ -1,8 +1,10 @@
 import Service from "../models/service.model.js";
 import catchAsync from "../utils/catch.async.js";
+import AppQueries from "../utils/App.queries.js";
 
 export const createService = catchAsync(async (req, res, next) => {
-  const newService = await Service.create(req.body);
+  const service = new Service();
+  const newService = await service.save(req.body);
 
   res.status(201).json({
     status: "success",
@@ -20,8 +22,14 @@ export const getService = catchAsync(async (req, res, next) => {
 });
 
 export const getAllServices = catchAsync(async (req, res, next) => {
-  const services = await Service.find({});
+  const appQueries = new AppQueries(req.query, Service)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
 
+  const services = await appQueries.query;
+  console.log(req.query);
   res.status(200).json({
     status: "success",
     data: { length: services.length, services },
