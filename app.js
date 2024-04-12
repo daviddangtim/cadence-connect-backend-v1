@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 app.use("/api/v1/services", serviceRouter);
 app.use("/api/v1/users", userRouter);
 
-// Operational Error Handler Middlewares
+// ERROR HANDLING MIDDLEWARES
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
