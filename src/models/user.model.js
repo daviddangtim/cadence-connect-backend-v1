@@ -6,35 +6,50 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Please enter your name"],
+      required: [true, "A name is required Please provide your full name"],
       trim: true,
     },
     email: {
       type: String,
-      required: ["An email is required"],
-      validate: [validator.isEmail, "Please enter a valid email"],
+      required: [
+        true,
+        "An email address is required Please provide a valid email",
+      ],
+      validate: [
+        validator.isEmail,
+        "Invalid email format Please enter a valid email address",
+      ],
       trim: true,
       lowercase: true,
       unique: true,
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      select: true,
+      trim: true,
+      required: [
+        true,
+        "A password is required Please create a secure password",
+      ],
     },
     confirmPassword: {
       type: String,
-      required: [true, "Confirm password is required"],
+      required: [true, "Please confirm your password"],
       validate: {
         validator: function (value) {
           return value === this.password;
         },
-        message: "Confirm password does not match password",
+        message:
+          "Passwords do not match Please ensure both passwords are identical",
       },
     },
-    role: {
+    userType: {
       type: String,
-      enum: ["admin", "client", "eventPlanner"],
-      required: [true, "Role is required"],
+      enum: ["client", "serviceProvider"],
+      required: [
+        true,
+        "A user type is required Please specify if you are a client or a service provider",
+      ],
     },
   },
   {
@@ -49,11 +64,22 @@ userSchema.virtual("isAdmin").get(function () {
 });
 
 userSchema.pre("save", async function (next) {
+  //password is only hashed if it's  ever modified
+  if (!this.isModified("password")) return next();
+
   this.password = await bcrypt.hash(this.password, 12);
 
-  //CONFIRM PASSWORD SHOULD NOT BE PERSISTED IN THE DB
-  this.confirmPasswod = undefined;
+  // The confirmPassword field is for validation only and should not be persisted
+  this.confirmPassword = undefined;
+  return next();
 });
+
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  password,
+) {
+  return await bcrypt.compare(candidatePassword, password);
+};
 
 const User = mongoose.model("User", userSchema);
 export default User;
