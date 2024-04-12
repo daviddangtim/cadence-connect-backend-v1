@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
@@ -45,6 +46,13 @@ const userSchema = new mongoose.Schema(
 
 userSchema.virtual("isAdmin").get(function () {
   return this.role === "admin";
+});
+
+userSchema.pre("save", async function (next) {
+  this.password = await bcrypt.hash(this.password, 12);
+
+  //CONFIRM PASSWORD SHOULD NOT BE PERSISTED IN THE DB
+  this.confirmPasswod = undefined;
 });
 
 const User = mongoose.model("User", userSchema);
