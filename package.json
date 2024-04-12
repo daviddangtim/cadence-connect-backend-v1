@@ -4,7 +4,7 @@
   "description": "An event management system",
   "main": "server.js",
   "scripts": {
-    "start": "NODE_ENV=production node server.js",
+    "start": "cross-env NODE_ENV=production nodemon server.js",
     "dev": "nodemon server.js"
   },
   "type": "module",
@@ -17,9 +17,11 @@
     "mongoose": "^8.2.3",
     "morgan": "^1.10.0",
     "slugify": "^1.6.6",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "validator": "^13.11.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^9.1.0",

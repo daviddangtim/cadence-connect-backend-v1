@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const locationSchema = new mongoose.Schema({
+const pointSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: ["Point"],
@@ -16,4 +16,4 @@ const locationSchema = new mongoose.Schema({
   },
 });
 
-export default locationSchema;
+export default pointSchema;

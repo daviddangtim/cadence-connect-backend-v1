@@ -6,6 +6,8 @@ export default class AppQueries {
 
   filter() {
     const queryObj = { ...this.queryObject };
+
+    // console.log(this.queryObject);
     const excludedFields = ["limit", "sort", "fields", "page"];
 
     excludedFields.forEach((el) => delete queryObj[el]);
@@ -17,7 +19,6 @@ export default class AppQueries {
       /\b(gte|gt|tle|lt)\b/g,
       (match) => `$${match}`,
     );
-    console.log(JSON.parse(serializedQueryObj));
     this.query = this.query.find(JSON.parse(serializedQueryObj));
     return this;
   }
@@ -27,7 +28,7 @@ export default class AppQueries {
       const sortValue = this.queryObject.sort.split(",").join(" ");
       this.query = this.query.sort(sortValue);
     } else {
-      this.query = this.query.sort("-createAt");
+      this.query = this.query.sort("-createdAt");
     }
     return this;
   }
@@ -39,6 +40,7 @@ export default class AppQueries {
     }
     return this;
   }
+
   paginate() {
     if (this.queryObject.page) {
       const page = this.queryObject.page * 1 || 1;
@@ -49,11 +51,3 @@ export default class AppQueries {
     return this;
   }
 }
-
-// const query = {
-//   price: { gt: "50" },
-//   cacVerified: "true",
-//   ratingsQuantity: { gte: "20" },
-// };
-//
-// console.log(query.ratingsQuantity);

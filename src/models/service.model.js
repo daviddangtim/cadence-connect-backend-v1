@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import slugify from "slugify";
-import locationSchema from "./schemas/location.schema.js";
+import pointSchema from "./schemas/point.schema.js";
 
 const serviceSchema = new mongoose.Schema(
   {
@@ -9,7 +9,7 @@ const serviceSchema = new mongoose.Schema(
       default: false,
     },
     categories: {
-      type: Array,
+      type: [String],
       required: [true, "A service must have a category"],
     },
     datesAvailable: {
@@ -32,8 +32,9 @@ const serviceSchema = new mongoose.Schema(
     },
     images: [String],
     location: {
-      type: locationSchema,
-      required: true,
+      type: pointSchema,
+      required: [true, "A service must have a location"],
+      index: "2dsphere",
     },
     maxBudget: {
       type: Number,
@@ -95,6 +96,5 @@ serviceSchema.pre("save", function (next) {
   next();
 });
 
-serviceSchema.index({ location: "2dsphere" });
 const Service = mongoose.model("Service", serviceSchema);
 export default Service;
