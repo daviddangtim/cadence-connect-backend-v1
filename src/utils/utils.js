@@ -3,8 +3,9 @@ import { v4 } from "uuid";
 
 dotenv.config({ path: "./config.env" });
 
-export const { DATABASE, DATABASE_LOCAL, DATABASE_PASSWORD, PORT, NODE_ENV } =
-  process.env;
+export const { PORT, NODE_ENV, JWT_SECRET, JWT_EXPIRES_IN } = process.env;
+
+const { DATABASE, DATABASE_LOCAL, DATABASE_PASSWORD } = process.env;
 
 export async function uuidV4() {
   return v4().replace(/-/g, "");

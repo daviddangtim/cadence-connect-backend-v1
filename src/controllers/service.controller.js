@@ -4,7 +4,23 @@ import AppQueries from "../utils/App.queries.js";
 import AppError from "../utils/App.error.js";
 
 export const createService = catchAsync(async (req, res, next) => {
-  const service = new Service(req.body);
+  const service = new Service({
+    name: req.body.name,
+    cacVerified: req.body.cacVerified,
+    datesAvailable: req.body.datesAvailable,
+    categories: req.body.categories,
+    description: req.body.description,
+    handleEmergency: req.body.handleEmergency,
+    imageCover: req.body.imageCover,
+    images: req.body.images,
+    location: req.body.location,
+    maxBudget: req.body.maxBudget,
+    minBudget: req.body.minBudget,
+    ratingsAverage: req.body.ratingsAverage,
+    ratingsQuantity: req.body.ratingsQuantity,
+    summary: req.body.summary,
+  });
+
   const newService = await service.save();
   res.status(201).json({
     status: "success",

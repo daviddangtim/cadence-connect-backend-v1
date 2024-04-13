@@ -1,0 +1,19 @@
+{
+  "cacVerified": true,
+  "categories": ["Wedding", "Birthday"],
+  "datesAvailable": ["2024-04-15", "2024-04-20"],
+  "description": "Celebrate your special occasions at Quincy's, where delectable dishes meet exceptional service in a cozy ambiance.",
+  "handleEmergency": false,
+  "location": {
+    "type": "Point",
+    "coordinates": [7.4951, 9.0579]
+  },
+  "name": "Quincy",
+  "ratingsQuantity": 25,
+  "ratingsAverage": 4.5,
+  "imageCover": "path/imageCover",
+  "summary": "Quincy's is the perfect venue for weddings and birthdays, offering delicious food and a welcoming atmosphere.",
+  "slug": "foodies-paradise",
+  "minBudget": 3000,
+  "maxBudget": 2000
+}

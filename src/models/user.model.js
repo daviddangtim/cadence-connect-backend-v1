@@ -25,12 +25,13 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      select: true,
+      // select: false,
       trim: true,
       required: [
         true,
         "A password is required Please create a secure password",
       ],
+      min: 8,
     },
     confirmPassword: {
       type: String,
@@ -43,6 +44,7 @@ const userSchema = new mongoose.Schema(
           "Passwords do not match Please ensure both passwords are identical",
       },
     },
+    passwordUpdatedAt: Date,
     userType: {
       type: String,
       enum: ["client", "serviceProvider"],
@@ -64,7 +66,6 @@ userSchema.virtual("isAdmin").get(function () {
 });
 
 userSchema.pre("save", async function (next) {
-  //password is only hashed if it's  ever modified
   if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
@@ -79,6 +80,15 @@ userSchema.methods.correctPassword = async function (
   password,
 ) {
   return await bcrypt.compare(candidatePassword, password);
+};
+
+userSchema.methods.passwordModifiedAfterJWT = function (JWTIsa) {
+  if (this.passwordUpdatedAt) {
+    const passwordTimeStampInSec = this.passwordUpdatedAt.getTime() / 1000;
+    return JWTIsa < passwordTimeStampInSec;
+  }
+
+  return false;
 };
 
 const User = mongoose.model("User", userSchema);

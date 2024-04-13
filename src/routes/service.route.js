@@ -9,9 +9,10 @@ import {
   getService,
   updateService,
 } from "../controllers/service.controller.js";
+import { protect } from "../controllers/auth.controller.js";
 
 const router = express.Router();
-router.route("/").post(createService).get(getAllServices);
+router.route("/").post(createService).get(protect, getAllServices);
 router.route("/:id").get(getService).patch(updateService).delete(deleteService);
 router.route("/alias/top-rated").get(getAllServicesByRating, getAllServices);
 router

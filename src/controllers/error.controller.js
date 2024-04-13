@@ -1,3 +1,4 @@
+import cloneDeep from "clone-deep";
 import { NODE_ENV } from "../utils/utils.js";
 import AppError from "../utils/App.error.js";
 
@@ -26,21 +27,29 @@ const sendProdError = (err, res) => {
   }
 };
 
-const handleCastError = (err) => {
+const handleCastErr = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
 };
 
-const handleDuplicateError = (err) => {
+const handleDuplicateErr = (err) => {
   const message = `Duplicate field value: ${err.keyValue.name}. Please enter another value`;
   return new AppError(message, 400);
 };
 
-const handleValidationError = (err) => {
+const handleValidationErr = (err) => {
   const errors = Object.values(err.errors).map((el) => el.message);
   const message = `Invalid input data: ${errors.join(". ")}`;
   return new AppError(message, 400);
 };
+
+const handleSyntaxErr = (err) => new AppError(err.message, 400);
+
+const handleJTWErr = () =>
+  new AppError("Invalid token. Login to gain access", 401);
+
+const handleJWTEXErr = () =>
+  new AppError("Token is expired. Login to gain access", 401);
 
 export default (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
@@ -49,12 +58,13 @@ export default (err, req, res, next) => {
   if (NODE_ENV === "development") {
     sendDevError(err, res);
   } else if (NODE_ENV === "production") {
-    //HARD COPY THE ERR OBJ TO AVOID MUTATION
-    let error = JSON.parse(JSON.stringify(err));
-
-    if (error.name === "CastError") error = handleCastError(error);
-    if (error.code === 11000) error = handleDuplicateError(error);
-    if (error.name === "ValidationError") error = handleValidationError(error);
+    let error = cloneDeep(err);
+    if (error.name === "CastError") error = handleCastErr(error);
+    if (error.code === 11000) error = handleDuplicateErr(error);
+    if (error.name === "ValidationError") error = handleValidationErr(error);
+    if (error.name === "SyntaxError") error = handleSyntaxErr(error);
+    if (error.name === "JsonWebTokenError") error = handleJTWErr();
+    if (error.name === "TokenExpiredError") error = handleJWTEXErr();
 
     sendProdError(error, res);
   }

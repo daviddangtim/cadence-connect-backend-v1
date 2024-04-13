@@ -74,6 +74,13 @@ const serviceSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: [0, "Rating quantity cannot be less than 0"],
+      validate: {
+        validator: function (value) {
+          return value >= this.ratingsAverage;
+        },
+        message:
+          "The ratings quantity: {VALUE}, can not be less than ratings average",
+      },
     },
     slug: String,
     summary: {
