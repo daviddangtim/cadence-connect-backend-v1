@@ -6,7 +6,7 @@ import AppError from "../utils/App.error.js";
 export const createService = catchAsync(async (req, res, next) => {
   const service = new Service({
     name: req.body.name,
-    cacVerified: req.body.cacVerified,
+    cacVerified: req.body.cacVerified, // TODO: THIS SHOULD BE REMOVED FOR PROD.
     datesAvailable: req.body.datesAvailable,
     categories: req.body.categories,
     description: req.body.description,

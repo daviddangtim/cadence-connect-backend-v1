@@ -5,9 +5,8 @@ import User from "../models/user.model.js";
 import { JWT_EXPIRES_IN, JWT_SECRET } from "../utils/utils.js";
 import AppError from "../utils/App.error.js";
 
-const signKey = async (id) => {
+const signKey = async (id) =>
   await jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-};
 
 export const signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
@@ -15,8 +14,9 @@ export const signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
-    userType: req.body.userType,
-    passwordUpdatedAt: req.body.passwordUpdatedAt,
+    role: req.body.role, // TODO: THIS SHOULD BE REMOVED FOR PROD.
+    photo: req.body.photo,
+    // passwordUpdatedAt: req.body.passwordUpdatedAt,
   });
 
   const token = await signKey(newUser._id);
@@ -48,7 +48,7 @@ export const login = catchAsync(async (req, res, next) => {
 });
 
 export const protect = catchAsync(async (req, res, next) => {
-  // 1) GET TOKEN AND CHECK IF NOT UNDEFINED OR NULL
+  // 1) CHECK IF CLIENT SENT TOKEN
   let token;
 
   const { authorization } = req.headers;
@@ -66,10 +66,37 @@ export const protect = catchAsync(async (req, res, next) => {
   // 2) VERIFY TOKEN
   const decoded = await promisify(jwt.verify)(token, JWT_SECRET);
 
-  // if (!decoded) {
-  //   return next(
-  //     new AppError("You are not logged in. Please login to access", 400),
-  //   );
-  // }
+  // 3) CHECK IF USER WITH THE TOKEN STILL EXISTS
+  const currentUser = await User.findById(decoded.id);
+
+  if (!currentUser) {
+    return next(
+      new AppError("The user belonging to this token no longer exits", 401),
+    );
+  }
+
+  // 3 CHECK IF PASSWORD HAS NOT BEEN CHANGED AFTER TOKEN ISSUE
+  if (currentUser.passwordModifiedAfterJWT(decoded.iat)) {
+    return next(
+      AppError("User recently changed password! Please log in again", 401),
+    );
+  }
+
+  // PASS THE CURRENT USER TO THE NEXT MIDDLEWARE
+  req.user = currentUser;
   next();
 });
+
+export const restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    // CHECK IF THE USER WHICH WAS PASSED DOWN BY THE PROTECT MIDDLEWARE IS AUTHORIZED
+
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You are not permitted to perform this action", 403),
+      );
+    }
+
+    next();
+  };

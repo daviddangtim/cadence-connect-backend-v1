@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import morgan from "morgan";
+import cors from "cors";
 import { NODE_ENV } from "./src/utils/utils.js";
 import serviceRouter from "./src/routes/service.route.js";
 import userRouter from "./src/routes/user.route.js";
@@ -13,6 +14,7 @@ const app = express();
 if (NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

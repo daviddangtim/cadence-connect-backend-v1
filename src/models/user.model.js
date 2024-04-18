@@ -4,10 +4,16 @@ import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    confirmPassword: {
       type: String,
-      required: [true, "A name is required Please provide your full name"],
-      trim: true,
+      required: [true, "Please confirm your password"],
+      validate: {
+        validator: function (value) {
+          return value === this.password;
+        },
+        message:
+          "Passwords do not match Please ensure both passwords are identical",
+      },
     },
     email: {
       type: String,
@@ -23,9 +29,14 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       unique: true,
     },
+    name: {
+      type: String,
+      required: [true, "A name is required Please provide your full name"],
+      trim: true,
+    },
     password: {
       type: String,
-      // select: false,
+      select: false,
       trim: true,
       required: [
         true,
@@ -33,25 +44,12 @@ const userSchema = new mongoose.Schema(
       ],
       min: 8,
     },
-    confirmPassword: {
-      type: String,
-      required: [true, "Please confirm your password"],
-      validate: {
-        validator: function (value) {
-          return value === this.password;
-        },
-        message:
-          "Passwords do not match Please ensure both passwords are identical",
-      },
-    },
     passwordUpdatedAt: Date,
-    userType: {
+    photo: String,
+    role: {
       type: String,
-      enum: ["client", "serviceProvider"],
-      required: [
-        true,
-        "A user type is required Please specify if you are a client or a service provider",
-      ],
+      enum: ["user", "admin"],
+      default: "user",
     },
   },
   {
@@ -83,12 +81,9 @@ userSchema.methods.correctPassword = async function (
 };
 
 userSchema.methods.passwordModifiedAfterJWT = function (JWTIsa) {
-  if (this.passwordUpdatedAt) {
-    const passwordTimeStampInSec = this.passwordUpdatedAt.getTime() / 1000;
-    return JWTIsa < passwordTimeStampInSec;
-  }
-
-  return false;
+  if (!this.passwordUpdatedAt) return false;
+  const passwordTimeStampInSec = this.passwordUpdatedAt.getTime() / 1000;
+  return JWTIsa < passwordTimeStampInSec;
 };
 
 const User = mongoose.model("User", userSchema);
