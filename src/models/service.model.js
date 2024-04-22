@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import slugify from "slugify";
-import pointSchema from "./schemas/point.schema.js";
+import pointSchema from "./point.schema.js";
 
 const serviceSchema = new mongoose.Schema(
   {
@@ -10,91 +10,93 @@ const serviceSchema = new mongoose.Schema(
     },
     categories: {
       type: [String],
-      required: [true, "A service must have a category"],
+      required: [true, "A category is required"],
+      validate: {
+        validator: function (value) {
+          const values = [
+            "wedding",
+            "parties and celebration",
+            "culture and religion",
+            "sport",
+            "rental",
+          ];
+          return value.every((category) =>
+            values.includes(category.toLowerCase()),
+          );
+        },
+        message:
+          "Invalid category. Category must be of type: Wedding, parties and celebration, culture and religion, sport, rental",
+      },
     },
-    datesAvailable: {
-      type: [Date],
+    coverImage: {
+      type: String,
+      required: [true, "A cover image is required"],
+      trim: true,
     },
     description: {
       type: String,
       trim: true,
-      required: [true, "A service must have a description"],
-      minlength: [200, "Description cannot be less than 400 characters long"],
-      maxlength: [800, "Description cannot be more than 1000 characters long"],
+      minLength: 200,
+      maxLength: 500,
     },
-    handleEmergency: {
+    emergency: {
       type: Boolean,
       default: false,
-    },
-    imageCover: {
-      type: String,
-      required: [true, "A service must have a cover image"],
     },
     images: [String],
     location: {
       type: pointSchema,
-      required: [true, "A service must have a location"],
+      required: [true, "A location is required"],
       index: "2dsphere",
     },
     maxBudget: {
       type: Number,
-      required: [true, "A service must have a maxBudget"],
+      required: [true, "A maximum budget is required"],
       validate: {
         validator: function (value) {
           return value > this.minBudget;
         },
-        message: `The maxBudget: {VALUE} cannot be less than or equal to minBudget`,
+        message:
+          "Maximum budget: {VALUE} cannot be less than the minimum budget",
       },
     },
     minBudget: {
       type: Number,
-      required: [true, "A service must have a minBudget"],
+      required: [true, "A minimum budget is required"],
       validate: {
         validator: function (value) {
-          return value < this.maxBudget;
+          return this.maxBudget > value;
         },
-        message: `The minBudget: {VALUE} cannot greater than or equal to maxBudget`,
+        message:
+          "Minimum budget: {VALUE} cannot be greater than the maximum budget",
       },
     },
     name: {
       type: String,
-      required: true,
-      unique: true,
       trim: true,
-      minlength: [1, "Name cannot be less than 1 character"],
-      maxlength: [40, "Name cannot be more than 40 characters"],
+      unique: true,
+      required: true,
     },
     ratingsAverage: {
       type: Number,
       default: 5,
-      min: [1, "Rating cannot be less than 1"],
-      max: [5, "Rating cannot be more than 5"],
+      min: 1,
     },
     ratingsQuantity: {
       type: Number,
       default: 0,
-      min: [0, "Rating quantity cannot be less than 0"],
-      validate: {
-        validator: function (value) {
-          return value >= this.ratingsAverage;
-        },
-        message:
-          "The ratings quantity: {VALUE}, can not be less than ratings average",
-      },
+      min: 0,
     },
+    schedule: [Date],
     slug: String,
     summary: {
       type: String,
-      trim: true,
-      required: [true, "A service must have a summary"],
-      minlength: [150, "Summary cannot be less than 200 characters long"],
-      maxlength: [300, "Summary cannot be more than 500 characters long"],
+      required: [true, "A summary is required"],
+      minlength: 50,
+      maxlength: 150,
     },
   },
-  {
-    timestamps: true,
-    virtuals: true,
-  },
+  { timestamps: true },
 );
 
 serviceSchema.pre("save", function (next) {
@@ -103,5 +105,15 @@ serviceSchema.pre("save", function (next) {
   next();
 });
 
+serviceSchema.pre("save", function (next) {
+  if (!this.isModified("categories")) return next();
+
+  this.categories.forEach((category, index) => {
+    this.categories[index] = category.toLowerCase();
+  });
+  next();
+});
+
 const Service = mongoose.model("Service", serviceSchema);
+
 export default Service;

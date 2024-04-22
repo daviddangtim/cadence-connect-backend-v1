@@ -1,79 +1,78 @@
-import Service from "../models/service.model.js";
 import catchAsync from "../utils/catch.async.js";
-import AppQueries from "../utils/App.queries.js";
-import AppError from "../utils/App.error.js";
+import Service from "../models/service.model.js";
+import AppError from "../utils/app.error.js";
+import AppQueries from "../utils/app.queries.js";
 
 export const createService = catchAsync(async (req, res, next) => {
-  const service = new Service({
-    name: req.body.name,
+  const newService = await Service.create({
     cacVerified: req.body.cacVerified, // TODO: THIS SHOULD BE REMOVED FOR PROD.
-    datesAvailable: req.body.datesAvailable,
     categories: req.body.categories,
     description: req.body.description,
-    handleEmergency: req.body.handleEmergency,
-    imageCover: req.body.imageCover,
+    emergency: req.body.emergency,
+    coverImage: req.body.coverImage,
     images: req.body.images,
     location: req.body.location,
     maxBudget: req.body.maxBudget,
     minBudget: req.body.minBudget,
+    name: req.body.name,
     ratingsAverage: req.body.ratingsAverage,
     ratingsQuantity: req.body.ratingsQuantity,
+    schedule: req.body.schedule,
     summary: req.body.summary,
   });
 
-  const newService = await service.save();
-  res.status(201).json({
+  res.status(200).json({
     status: "success",
     data: { newService },
   });
 });
 
+export const getAllServices = catchAsync(async (req, res, next) => {
+  const servicesQueries = new AppQueries(req.query, Service.find())
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const services = await servicesQueries.query;
+
+  res.status(200).json({
+    status: "success",
+    result: services.length,
+    data: { services },
+  });
+  // const services = await Service.find();
+});
+
 export const getService = catchAsync(async (req, res, next) => {
-  const service = await Service.findById(req.params.id);
+  const { id } = req.params;
+
+  const service = await Service.findById(id, {}, { lean: true });
 
   if (!service) {
-    return next(
-      new AppError(`No service found with id: ${req.params.id}`, 400),
-    );
+    return next(new AppError(`No service was found with this id: ${id}`, 404));
   }
+
   res.status(200).json({
     status: "success",
     data: { service },
   });
 });
 
-export const getAllServices = catchAsync(async (req, res, next) => {
-  const appQueries = new AppQueries(req.query, Service.find())
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-
-  const services = await appQueries.query;
-  res.status(200).json({
-    status: "success",
-    data: { length: services.length, services },
-  });
-});
-
 export const updateService = catchAsync(async (req, res, next) => {
-  if (!updateService) {
-    return next(
-      new AppError(`No service found with id: ${req.params.id}`, 400),
-    );
-  }
+  const { id } = req.params;
 
-  const updatedService = await Service.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    {
-      includeResultMetadata: true,
-      lean: true,
-      new: true,
-      runValidators: true,
-      context: "query",
-    },
-  );
+  const excludedFields = ["cacVerified", "createdAt", "updatedAt"];
+  const updatedFields = { ...req.body };
+
+  // removing fields that should not be updated by the client
+  excludedFields.forEach((field) => delete updatedFields[field]);
+
+  const updatedService = await Service.findByIdAndUpdate(id, updatedFields);
+
+  if (!updatedService) {
+    return next(new AppError(`No service was found with this id: ${id}`, 404));
+  }
 
   res.status(200).json({
     status: "success",
@@ -82,30 +81,13 @@ export const updateService = catchAsync(async (req, res, next) => {
 });
 
 export const deleteService = catchAsync(async (req, res, next) => {
-  const deletedService = await Service.findByIdAndDelete(
-    req.params.id,
-    req.body,
-  );
+  const { id } = req.params;
+
+  const deletedService = await Service.findByIdAndDelete(id, { lean: true });
 
   if (!deletedService) {
-    return next(
-      new AppError(`No service found with id: ${req.params.id}`, 400),
-    );
+    return next(new AppError(`No service was found with this id: ${id}`, 404));
   }
+
   res.status(204).end();
 });
-
-export const getAllServicesByRating = catchAsync(async (req, res, next) => {
-  //SERVICES WITH LESS THAN 3.5 RATINGS AVERAGE WILL BE EXCLUDED
-  req.query.sort = "-ratingsAverage,-ratingsQuantity";
-  req.query.fields = "names, ratingsAverage, cacVerified, categories, summary";
-  req.query.limit = 5;
-  req.query.ratingsAverage = { gte: 3.5 };
-  next();
-});
-export const getAllServicesByEmergencyStatus = catchAsync(
-  async (req, res, next) => {},
-);
-export const getAllCacVerifiedServices = catchAsync(
-  async (req, res, next) => {},
-);

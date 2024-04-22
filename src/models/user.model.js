@@ -4,87 +4,73 @@ import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
-    confirmPassword: {
+    email: {
       type: String,
-      required: [true, "Please confirm your password"],
+      trim: true,
+      lowercase: true,
+      required: [true, "Email is required"],
+      unique: true,
+      validate: [validator.isEmail, "Invalid email address"],
+    },
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+      trim: true,
+      minlength: 1,
+      maxlength: 100,
+    },
+    password: {
+      type: String,
+      minlength: 8,
+      select: false,
+      required: [true, "Password is required"],
+    },
+    passwordConfirm: {
+      type: String,
+      required: [true, "Confirm password is required"],
       validate: {
         validator: function (value) {
           return value === this.password;
         },
-        message:
-          "Passwords do not match Please ensure both passwords are identical",
+        message: "Confirm password must be the same with password",
       },
     },
-    email: {
-      type: String,
-      required: [
-        true,
-        "An email address is required Please provide a valid email",
-      ],
-      validate: [
-        validator.isEmail,
-        "Invalid email format Please enter a valid email address",
-      ],
-      trim: true,
-      lowercase: true,
-      unique: true,
-    },
-    name: {
-      type: String,
-      required: [true, "A name is required Please provide your full name"],
-      trim: true,
-    },
-    password: {
-      type: String,
-      select: false,
-      trim: true,
-      required: [
-        true,
-        "A password is required Please create a secure password",
-      ],
-      min: 8,
-    },
+    passwordResetExpires: Date,
+    passwordResetToken: String,
     passwordUpdatedAt: Date,
     photo: String,
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: {
+        values: ["user", "admin"],
+        message: "Role must be of type user or admin only",
+      },
       default: "user",
     },
   },
-  {
-    timestamps: true,
-    toObject: { virtuals: true },
-    toJSON: { virtuals: true },
-  },
+  { timestamps: true },
 );
-
-userSchema.virtual("isAdmin").get(function () {
-  return this.role === "admin";
-});
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-
-  this.password = await bcrypt.hash(this.password, 12);
-
-  // The confirmPassword field is for validation only and should not be persisted
-  this.confirmPassword = undefined;
-  return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  this.passwordConfirm = undefined; // does not need to be persisted
+  next();
 });
 
-userSchema.methods.correctPassword = async function (
-  candidatePassword,
+userSchema.methods.validatePassword = async function (
   password,
+  hashedPassword,
 ) {
-  return await bcrypt.compare(candidatePassword, password);
+  return await bcrypt.compare(hashedPassword, password);
 };
 
-userSchema.methods.passwordModifiedAfterJWT = function (JWTIsa) {
+userSchema.methods.passwordUpdatedAfterJwt = function (jwtIsa) {
   if (!this.passwordUpdatedAt) return false;
-  const passwordTimeStampInSec = this.passwordUpdatedAt.getTime() / 1000;
-  return JWTIsa < passwordTimeStampInSec;
+  const passwordIsa = parseInt(this.passwordUpdatedAt.getTime() / 1000, 10);
+  return jwtIsa > passwordIsa;
 };
 
 const User = mongoose.model("User", userSchema);
+
 export default User;
