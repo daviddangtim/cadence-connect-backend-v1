@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/cadence-connect-backend.iml" filepath="$PROJECT_DIR$/.idea/cadence-connect-backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/candence-connect-backend.iml" filepath="$PROJECT_DIR$/.idea/candence-connect-backend.iml" />
     </modules>
   </component>
 </project>

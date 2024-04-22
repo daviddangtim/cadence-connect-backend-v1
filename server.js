@@ -1,42 +1,42 @@
-import mongoose from "mongoose";
+/* eslint-disable */
+import dotenv from "dotenv/config";
 import app from "./app.js";
-import { getDbUrl, PORT } from "./src/utils/utils.js";
+import connectDb from "./src/utils/db.js";
 
 process.on("uncaughtException", (err) => {
-  console.error("UNCAUGHT EXCEPTION! 💥 Shutting down...");
+  console.error("💥💥💥 UNCAUGHT EXCEPTION! 💥 Shutting down... 💥💥💥");
   console.error(err.name, err.message);
   process.exit(1);
 });
 
-async function connectToDatabase() {
+const startServer = async () => {
   try {
-    const dbUrl = await getDbUrl({ useLocalDb: true });
-    await mongoose.connect(dbUrl);
-    console.log("MongoDB connected successfully");
-  } catch (err) {
-    console.error("ERROR CONNECTING TO DB! 💥 Shutting down...");
-    console.error(err.name, err.message);
-    process.exit(1); // Exit process if DB connection fails
-  }
-}
-
-async function startServer() {
-  const port = PORT || 3000;
-  const server = app.listen(port, () => {
-    console.log(`Listening to requests on port ${port}`);
-  });
-
-  process.on("unhandledRejection", (err) => {
-    console.error("UNHANDLED REJECTION! 💥 Shutting down...");
-    console.error(err.name, err.message);
-    server.close(() => {
-      process.exit(1);
+    const { PORT } = process.env;
+    const port = PORT || 5000;
+    const server = app.listen(port, () => {
+      console.log(`Listening to request on  http://127.0.0.1:${port}`);
     });
-  });
-}
 
-// Connect to DB and start the server
+    process.on("unhandledRejection", (err) => {
+      console.error("💥💥💥 UNHANDLED REJECTION! Shutting down... 💥💥💥");
+      console.error(err.name, err.message);
+      server.close(() => {
+        process.exit(1);
+      });
+    });
+  } catch (err) {
+    console.error("Error starting server:", err);
+    process.exit(1);
+  }
+};
+
 (async () => {
-  await connectToDatabase();
-  await startServer();
+  try {
+    await connectDb({ local: true });
+    await startServer();
+  } catch (err) {
+    console.error("💥💥💥 Error initializing server 💥💥💥");
+    console.error(err.name, err.message);
+    process.exit(1);
+  }
 })();

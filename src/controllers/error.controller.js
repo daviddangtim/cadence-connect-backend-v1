@@ -1,6 +1,7 @@
+/*eslint-disable*/
+import AppError from "../utils/app.error.js";
 import cloneDeep from "clone-deep";
-import { NODE_ENV } from "../utils/utils.js";
-import AppError from "../utils/App.error.js";
+const { NODE_ENV } = process.env;
 
 const sendDevError = (err, res) => {
   res.status(err.statusCode).json({
@@ -19,37 +20,36 @@ const sendProdError = (err, res) => {
       message: err.message,
     });
   } else {
-    console.error(`ERROR: 💥`, err);
+    console.error(`ERROR: 💥💥💥💥`, err);
     res.status(err.statusCode).json({
-      status: "error",
+      status: 500,
       message: "Something went very wrong!",
     });
   }
 };
 
-const handleCastErr = (err) => {
-  const message = `Invalid ${err.path}: ${err.value}`;
-  return new AppError(message, 400);
-};
-
-const handleDuplicateErr = (err) => {
-  const message = `Duplicate field value: ${err.keyValue.name}. Please enter another value`;
-  return new AppError(message, 400);
-};
-
-const handleValidationErr = (err) => {
+const handleDbValidationErr = (err) => {
   const errors = Object.values(err.errors).map((el) => el.message);
   const message = `Invalid input data: ${errors.join(". ")}`;
   return new AppError(message, 400);
 };
 
-const handleSyntaxErr = (err) => new AppError(err.message, 400);
+const handleDbDuplicateErr = (err) => {
+  const value = Object.values(err.keyValue).map((el) => el);
+  const message = `Duplicate field value: ${value.join(" ")}. Please enter another value`;
+  return new AppError(message, 400);
+};
 
-const handleJTWErr = () =>
-  new AppError("Invalid token. Login to gain access", 401);
+const handleDbCastErr = (err) => {
+  const message = `Invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400);
+};
 
-const handleJWTEXErr = () =>
+const handleJwtTokenExpiredError = (err) =>
   new AppError("Token is expired. Login to gain access", 401);
+
+const handleJwtJsonWebTokenError = (err) =>
+  new AppError("Invalid token. Login to gain access", 401);
 
 export default (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
@@ -59,13 +59,14 @@ export default (err, req, res, next) => {
     sendDevError(err, res);
   } else if (NODE_ENV === "production") {
     let error = cloneDeep(err);
-    if (error.name === "CastError") error = handleCastErr(error);
-    if (error.code === 11000) error = handleDuplicateErr(error);
-    if (error.name === "ValidationError") error = handleValidationErr(error);
-    if (error.name === "SyntaxError") error = handleSyntaxErr(error);
-    if (error.name === "JsonWebTokenError") error = handleJTWErr();
-    if (error.name === "TokenExpiredError") error = handleJWTEXErr();
 
+    if (error.name === "ValidationError") error = handleDbValidationErr(err);
+    if (error.code === 11000) error = handleDbDuplicateErr(err);
+    if (error.name === "CastError") error = handleDbCastErr(err);
+    if (error.name === "TokenExpiredError")
+      error = handleJwtTokenExpiredError();
+    if (error.name === "JsonWebTokenError")
+      error = handleJwtJsonWebTokenError();
     sendProdError(error, res);
   }
 };

@@ -5,28 +5,24 @@ export default class AppQueries {
   }
 
   filter() {
-    const queryObj = { ...this.queryObject };
+    // eslint-disable-next-line node/no-unsupported-features/es-syntax
+    const clonedQueryObject = { ...this.queryObject };
+    const excludedFields = ["sort", "limit", "page", "fields"];
 
-    // console.log(this.queryObject);
-    const excludedFields = ["limit", "sort", "fields", "page"];
+    excludedFields.forEach((el) => delete clonedQueryObject[el]);
 
-    excludedFields.forEach((el) => delete queryObj[el]);
+    let queryStr = JSON.stringify(clonedQueryObject);
+    // console.log("The query string is", JSON.parse(queryStr));
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
-    // the replace method cannot work on objects directly so I have
-    // stringify the object
-    let serializedQueryObj = JSON.stringify(queryObj);
-    serializedQueryObj = serializedQueryObj.replace(
-      /\b(gte|gt|tle|lt)\b/g,
-      (match) => `$${match}`,
-    );
-    this.query = this.query.find(JSON.parse(serializedQueryObj));
+    this.query = this.query.find(JSON.parse(queryStr));
     return this;
   }
 
   sort() {
     if (this.queryObject.sort) {
-      const sortValue = this.queryObject.sort.split(",").join(" ");
-      this.query = this.query.sort(sortValue);
+      const sortString = this.queryObject.split(",").join(" ");
+      this.query = this.query.sort(sortString);
     } else {
       this.query = this.query.sort("-createdAt");
     }
@@ -34,18 +30,19 @@ export default class AppQueries {
   }
 
   limitFields() {
-    if (this.queryObject.fields) {
-      const fields = this.queryObject.fields.split(",").join(" ");
-      this.query = this.query.select(fields);
+    if (this.queryObject.limit) {
+      const limitString = this.queryObject.split(",").join(" ");
+      this.query = this.query.select(limitString);
     }
     return this;
   }
 
   paginate() {
     if (this.queryObject.page) {
-      const page = this.queryObject.page * 1 || 1;
-      const limit = this.queryObject.limit * 1 || 10;
+      const page = this.queryObject.page || 1;
+      const limit = this.queryObject.limit || 10;
       const skip = (page - 1) * limit;
+
       this.query = this.query.skip(skip).limit(limit);
     }
     return this;
