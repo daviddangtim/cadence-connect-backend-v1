@@ -58,14 +58,12 @@ export const protect = catchAsync(async (req, res, next) => {
   }
 
   if (!token) {
-    console.log(token, authorization);
     return next(
       new AppError("You are not logged in, please log in to access", 401),
     );
   }
 
   const decoded = await jwt.verify(token);
-  console.log(decoded);
 
   const user = await User.findById(decoded.payload);
 
