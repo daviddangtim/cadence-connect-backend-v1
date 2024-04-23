@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import AppError from "../utils/app.error.js";
+import AppError from "../utils/App.error.js";
 import Jwt from "../utils/jwt.js";
 import catchAsync from "../utils/catch.async.js";
 import sendEmail from "../utils/email.js";
