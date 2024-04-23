@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const userSchema = new mongoose.Schema(
   {
@@ -69,6 +70,19 @@ userSchema.methods.passwordUpdatedAfterJwt = function (jwtIsa) {
   if (!this.passwordUpdatedAt) return false;
   const passwordIsa = parseInt(this.passwordUpdatedAt.getTime() / 1000, 10);
   return jwtIsa > passwordIsa;
+};
+
+userSchema.methods.createPasswordResetToken = async function () {
+  const resetToken = await crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // this is 10 mins in ms
+
+  return resetToken;
 };
 
 const User = mongoose.model("User", userSchema);
