@@ -1,6 +1,7 @@
 /*eslint-disable*/
-import AppError from "../utils/app.error.js";
 import cloneDeep from "clone-deep";
+import AppError from "../utils/app.error.js";
+
 const { NODE_ENV } = process.env;
 
 const sendDevError = (err, res) => {
@@ -20,7 +21,7 @@ const sendProdError = (err, res) => {
       message: err.message,
     });
   } else {
-    console.error(`ERROR: 💥💥💥💥`, err);
+    console.error("ERROR: 💥💥💥💥", err);
     res.status(err.statusCode).json({
       status: 500,
       message: "Something went very wrong!",
@@ -63,10 +64,12 @@ export default (err, req, res, next) => {
     if (error.name === "ValidationError") error = handleDbValidationErr(err);
     if (error.code === 11000) error = handleDbDuplicateErr(err);
     if (error.name === "CastError") error = handleDbCastErr(err);
-    if (error.name === "TokenExpiredError")
+    if (error.name === "TokenExpiredError") {
       error = handleJwtTokenExpiredError();
-    if (error.name === "JsonWebTokenError")
+    }
+    if (error.name === "JsonWebTokenError") {
       error = handleJwtJsonWebTokenError();
+    }
     sendProdError(error, res);
   }
 };

@@ -7,6 +7,10 @@ const { JWT_EXPIRES_IN, JWT_SECRET } = process.env;
 const jwt = new Jwt(JWT_SECRET, JWT_EXPIRES_IN);
 
 export const signUp = catchAsync(async (req, res, next) => {
+  if (await User.findOne({ email: req.body.email }).lean()) {
+    return next(new AppError("User already exists", 400));
+  }
+
   const user = await User.create({
     email: req.body.email,
     name: req.body.name,
@@ -63,7 +67,7 @@ export const protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  const decoded = await jwt.verify(token);
+  const decoded = await jwt.verify(token); // this will throw an error if the promise fails which will be hadnled in the glabal error handler
 
   const user = await User.findById(decoded.payload);
 
@@ -93,6 +97,21 @@ export const restrictTo =
     next();
   };
 
-export const forgotPassword = catchAsync(async (req, res, next) => {});
+export const forgotPassword = catchAsync(async (req, res, next) => {
+  // 1) get the user email and check if user
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError("There is no user with this email", 404));
+  }
+
+  // 2) Generate and send a resetToken
+  const resetToken = await user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    status: "success",
+    resetToken,
+  });
+});
 
 export const resetPassword = catchAsync(async (req, res, next) => {});
