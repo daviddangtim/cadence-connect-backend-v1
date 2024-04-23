@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema(
         values: ["client", "provider", "admin"],
         message: "Role must be of type user, provider or admin only",
       },
-      default: "user",
+      default: "client",
     },
   },
   { timestamps: true },
@@ -75,6 +75,7 @@ userSchema.methods.validatePassword = async function (
 userSchema.methods.passwordUpdatedAfterJwt = function (jwtIsa) {
   if (!this.passwordChangedAt) return false;
   const passwordIsa = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+  // console.log({ jwtIsa, passwordIsa });
   return jwtIsa > passwordIsa;
 };
 
