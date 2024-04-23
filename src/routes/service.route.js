@@ -13,7 +13,7 @@ const router = express.Router();
 router
   .route("/")
   .post(createService)
-  .get(protect, restrictTo("admin"), getAllServices);
+  .get(protect, restrictTo("admin", "client"), getAllServices);
 router.route("/:id").get(getService).patch(updateService).delete(deleteService);
 
 export default router;
