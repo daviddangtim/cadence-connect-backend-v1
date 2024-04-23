@@ -38,13 +38,13 @@ const userSchema = new mongoose.Schema(
     },
     passwordResetExpires: Date,
     passwordResetToken: String,
-    passwordUpdatedAt: Date,
+    passwordChangedAt: Date,
     photo: String,
     role: {
       type: String,
       enum: {
-        values: ["user", "admin"],
-        message: "Role must be of type user or admin only",
+        values: ["client", "provider", "admin"],
+        message: "Role must be of type user, provider or admin only",
       },
       default: "user",
     },
@@ -59,6 +59,12 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) return next();
+  this.passwordChangedAt = Date.now() - 1000; // NOTICE: removed 1 sec to make sure that passwordChangedAt will be less than jwt because of save difference
+  next();
+});
+
 userSchema.methods.validatePassword = async function (
   password,
   hashedPassword,
@@ -67,8 +73,8 @@ userSchema.methods.validatePassword = async function (
 };
 
 userSchema.methods.passwordUpdatedAfterJwt = function (jwtIsa) {
-  if (!this.passwordUpdatedAt) return false;
-  const passwordIsa = parseInt(this.passwordUpdatedAt.getTime() / 1000, 10);
+  if (!this.passwordChangedAt) return false;
+  const passwordIsa = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
   return jwtIsa > passwordIsa;
 };
 
@@ -80,7 +86,7 @@ userSchema.methods.createPasswordResetToken = async function () {
     .update(resetToken)
     .digest("hex");
 
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // this is 10 mins in ms
+  this.passwordResetExpires = Date.now() + 5 * 60 * 1000; // this is 5 mins in ms
 
   return resetToken;
 };
