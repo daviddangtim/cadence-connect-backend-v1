@@ -142,7 +142,15 @@ export const resetPassword = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError("Token is invalid or expired", 400));
   }
-  x;
+
+  if (await user.comparePassword(password, user.password)) {
+    return next(
+      new AppError(
+        "New password cannot be the same as the current password",
+        400,
+      ),
+    );
+  }
 
   user.password = password;
   user.passwordConfirm = passwordConfirm;
