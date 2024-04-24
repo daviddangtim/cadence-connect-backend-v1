@@ -2,9 +2,9 @@ import express from "express";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import AppError from "./src/utils/App.error.js";
+import globalErrorController from "./src/controllers/error.controller.js";
 import serviceRoute from "./src/routes/service.route.js";
 import userRoute from "./src/routes/user.route.js";
-import globalErrorController from "./src/controllers/error.controller.js";
 
 const app = express();
 

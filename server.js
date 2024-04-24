@@ -18,8 +18,8 @@ const startServer = async () => {
     });
 
     process.on("unhandledRejection", (err) => {
-      console.error("💥💥💥 UNHANDLED REJECTION! Shutting down... 💥💥💥");
-      console.error(err.name, err.message);
+      console.error("💥💥💥 UNHANDLED REJECTION! 💥 Shutting down... 💥💥💥");
+      console.error(err.name, err.message, err.stack);
       server.close(() => {
         process.exit(1);
       });

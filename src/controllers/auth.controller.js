@@ -3,6 +3,7 @@ import AppError from "../utils/App.error.js";
 import Jwt from "../utils/jwt.js";
 import catchAsync from "../utils/catch.async.js";
 import sendEmail from "../utils/email.js";
+import sendToken from "../utils/token.js";
 import User from "../models/user.model.js";
 
 const { JWT_EXPIRES_IN, JWT_SECRET } = process.env;
@@ -19,17 +20,12 @@ export const signUp = catchAsync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     photo: req.body.photo,
+    gender: req.body.gender,
     role: req.body.role, // TODO: make sure this is removed in PROD.
     passwordChangedAt: req.body.passwordChangedAt, // TODO: make sure this is removed in PROD.
   });
 
-  const token = await jwt.sign(user._id);
-
-  res.status(200).json({
-    status: "success",
-    token,
-    data: { user },
-  });
+  await sendToken(user, 201, res);
 });
 
 export const login = catchAsync(async (req, res, next) => {
@@ -41,18 +37,13 @@ export const login = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email }).select("+password");
 
-  if (!user || !(await user.validatePassword(user.password, password))) {
+  if (!user || !(await user.comparePassword(password, user.password))) {
     return next(new AppError("Password or email is incorrect", 400));
   }
 
-  user.password = undefined;
-  const token = await jwt.sign(user._id);
+  user.password = undefined; // password is not sent in the response
 
-  res.status(200).json({
-    status: "success",
-    token,
-    user,
-  });
+  await sendToken(user, 200, res);
 });
 
 export const protect = catchAsync(async (req, res, next) => {
@@ -79,7 +70,7 @@ export const protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  if (user.passwordUpdatedAfterJwt(decoded.iat)) {
+  if (user.passwordChangedAfterJwt(decoded.iat)) {
     return next(
       new AppError("User recently changed password! Please log in again", 401),
     );
@@ -128,6 +119,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   } catch (err) {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
 
     return next(
       new AppError("There was an error while resetting your password", 500),
@@ -144,7 +136,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ passwordResetToken: hashedToken });
 
-  // 2) If token has not expired and a user, set the new password
+  // 2) If the token has not expired and a user, set the new password
   if (!user) {
     return next(new AppError("Token is invalid or expired", 400));
   }
@@ -155,13 +147,42 @@ export const resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetExpires = undefined;
   await user.save();
 
-  console.log(user);
-
   // 3) Log the user in
-  const token = await jwt.sign(user._id);
+  sendToken(user, 200, res);
+});
 
-  res.status(200).json({
-    status: "success",
-    token,
-  });
+export const updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Confirm password
+  const { passwordCurrent, password, passwordConfirm } = req.body;
+
+  if (!password || !passwordConfirm || !passwordCurrent) {
+    return next(
+      new AppError(
+        "You must provide a current password, password and password confirm",
+        400,
+      ),
+    );
+  }
+  const user = await User.findById(req.user._id).select("+password");
+
+  if (!(await user.comparePassword(passwordCurrent, user.password))) {
+    return next(new AppError("Current password is incorrect"), 401);
+  }
+
+  if (await user.comparePassword(password, user.password)) {
+    return next(
+      new AppError(
+        "New password cannot be the same as the current password",
+        400,
+      ),
+    );
+  }
+
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+  await user.save();
+
+  user.password = undefined; // password should not be sent to the client
+
+  sendToken(user, 200, res);
 });
