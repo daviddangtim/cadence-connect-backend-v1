@@ -13,6 +13,14 @@ const userSchema = new mongoose.Schema(
       unique: true,
       validate: [validator.isEmail, "Invalid email address"],
     },
+    gender: {
+      type: String,
+      required: [true, "Gender is required"],
+      enum: {
+        values: ["male", "female"],
+      },
+      message: "Gender Must be male or female",
+    },
     name: {
       type: String,
       required: [true, "Name is required"],
@@ -26,6 +34,7 @@ const userSchema = new mongoose.Schema(
       select: false,
       required: [true, "Password is required"],
     },
+    passwordChangedAt: Date,
     passwordConfirm: {
       type: String,
       required: [true, "Confirm password is required"],
@@ -38,7 +47,7 @@ const userSchema = new mongoose.Schema(
     },
     passwordResetExpires: Date,
     passwordResetToken: String,
-    passwordChangedAt: Date,
+    phone: String,
     photo: String,
     role: {
       type: String,
@@ -54,6 +63,8 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
+
+  console.log(`password is modified?: ${this.isModified("password")}`);
   this.password = await bcrypt.hash(this.password, 10);
   this.passwordConfirm = undefined; // does not need to be persisted
   next();
@@ -65,18 +76,19 @@ userSchema.pre("save", function (next) {
   next();
 });
 
-userSchema.methods.validatePassword = async function (
-  password,
+userSchema.methods.comparePassword = async function (
+  plaintextPassword,
   hashedPassword,
 ) {
-  return await bcrypt.compare(hashedPassword, password);
+  return await bcrypt.compare(plaintextPassword, hashedPassword);
 };
 
-userSchema.methods.passwordUpdatedAfterJwt = function (jwtIsa) {
+userSchema.methods.passwordChangedAfterJwt = function (jwtIsa) {
   if (!this.passwordChangedAt) return false;
   const passwordIsa = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
-  // console.log({ jwtIsa, passwordIsa });
-  return jwtIsa > passwordIsa;
+
+  // return true when passworIsa is greater than jwtIas
+  return passwordIsa > jwtIsa;
 };
 
 userSchema.methods.createPasswordResetToken = async function () {
