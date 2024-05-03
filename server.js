@@ -1,5 +1,7 @@
 /* eslint-disable */
 import dotenv from "dotenv/config";
+import http from "node:http";
+import { Server } from "socket.io";
 import app from "./app.js";
 import connectDb from "./src/utils/db.js";
 
@@ -13,7 +15,13 @@ const startServer = async () => {
   try {
     const { PORT } = process.env;
     const port = PORT || 5000;
-    const server = app.listen(port, () => {
+    const server = http.createServer(app);
+    const io = new Server(server);
+
+    io.on("connection", (socket) => {
+      console.log(socket);
+    });
+    server.listen(port, () => {
       console.log(`Listening to request on  http://127.0.0.1:${port}`);
     });
 
