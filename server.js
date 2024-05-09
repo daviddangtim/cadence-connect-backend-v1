@@ -11,7 +11,7 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-const startServer = async () => {
+const startServer = async (ev, listener) => {
   try {
     const { PORT } = process.env;
     const port = PORT || 5000;
@@ -21,6 +21,7 @@ const startServer = async () => {
     io.on("connection", (socket) => {
       console.log(socket);
     });
+
     server.listen(port, () => {
       console.log(`Listening to request on  http://127.0.0.1:${port}`);
     });
