@@ -7,7 +7,6 @@ export const sServer = new Server();
 
 export default (httpServer) => {
   httpServer.on("connection", (socketServer) => {
-    console.log("a new client connected");
     socketServer.on("", () => {});
     socketServer.on("", () => {});
     socketServer.on("", () => {});
