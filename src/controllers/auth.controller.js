@@ -27,6 +27,17 @@ export const signUp = catchAsync(async (req, res, next) => {
 
   const user = await User.create(userData, {});
 
+  const user = await User.create({
+    email: req.body.email,
+    name: req.body.name,
+    password: req.body.password,
+    passwordConfirm: req.body.passwordConfirm,
+    photo: req.body.photo,
+    gender: req.body.gender,
+    role: req.body.role, // TODO: make sure this is removed in PROD.
+    passwordChangedAt: req.body.passwordChangedAt, // TODO: make sure this is removed in PROD.
+  });
+
   await sendToken(user, 201, res);
 });
 
