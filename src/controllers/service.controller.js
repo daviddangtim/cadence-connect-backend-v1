@@ -30,23 +30,7 @@ export const createService = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getAllServices = catchAsync(async (req, res, next) => {
-  console.log(Service.find());
-  const servicesQueries = new AppQueries(req.query, Service.find())
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-
-  const services = await servicesQueries.query;
-
-  res.status(200).json({
-    status: "success",
-    result: services.length,
-    data: { services },
-  });
-  // const services = await Service.find();
-});
+export const getAllServices = catchAsync(() => {});
 
 export const getService = catchAsync(async (req, res, next) => {
   const { id } = req.params;
