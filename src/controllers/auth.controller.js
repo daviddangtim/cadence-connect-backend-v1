@@ -1,10 +1,11 @@
 import crypto from "crypto";
-import AppError from "../utils/App.error.js";
+import AppError from "../utils/app.error.js";
 import Jwt from "../utils/jwt.js";
 import catchAsync from "../utils/catch.async.js";
 import sendEmail from "../utils/email.js";
 import sendToken from "../utils/token.js";
 import User from "../models/user.model.js";
+import filterObject from "../utils/filterObject.js";
 
 const { JWT_EXPIRES_IN, JWT_SECRET } = process.env;
 const jwt = new Jwt(JWT_SECRET, JWT_EXPIRES_IN);
@@ -13,17 +14,18 @@ export const signUp = catchAsync(async (req, res, next) => {
   if (await User.findOne({ email: req.body.email }).lean()) {
     return next(new AppError("User already exists", 400));
   }
+  const userData = filterObject(
+    req.body,
+    "email",
+    "name",
+    "password",
+    "passwordConfirm",
+    "photo",
+    "gender",
+    "role",
+  );
 
-  const user = await User.create({
-    email: req.body.email,
-    name: req.body.name,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm,
-    photo: req.body.photo,
-    gender: req.body.gender,
-    role: req.body.role, // TODO: make sure this is removed in PROD.
-    passwordChangedAt: req.body.passwordChangedAt, // TODO: make sure this is removed in PROD.
-  });
+  const user = await User.create(userData, {});
 
   await sendToken(user, 201, res);
 });

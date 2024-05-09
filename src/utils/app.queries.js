@@ -15,6 +15,7 @@ export default class AppQueries {
     // console.log("The query string is", JSON.parse(queryStr));
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
+    console.log(this.query);
     this.query = this.query.find(JSON.parse(queryStr));
     return this;
   }
