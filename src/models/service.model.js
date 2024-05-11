@@ -30,11 +30,6 @@ const serviceSchema = new mongoose.Schema(
           "Invalid category. Category must be of type: Wedding, parties and celebration, culture and religion, sport, rental",
       },
     },
-    coverImage: {
-      type: String,
-      required: [false, "A cover image is required"],
-      trim: true,
-    },
     description: {
       type: String,
       trim: true,
@@ -45,7 +40,12 @@ const serviceSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    images: [String],
+    coverImage: {
+      filename: String,
+      path: String,
+      size: Number,
+      mimetype: String,
+    },
     location: {
       type: pointSchema,
       required: [false, "A location is required"],

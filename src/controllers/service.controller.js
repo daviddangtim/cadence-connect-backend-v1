@@ -11,6 +11,8 @@ import filterObject from "../utils/filterObject.js";
 import Service from "../models/service.model.js";
 
 export const createService = catchAsync(async (req, res, next) => {
+ 
+
   const serviceData = filterObject(
     req.body,
     "cacVerified", // FIXME: THIS SHOULD BE REMOVED FOR PROD.
@@ -28,7 +30,15 @@ export const createService = catchAsync(async (req, res, next) => {
     "schedule",
     "summary",
   );
+ 
   const newService = await Service.create(serviceData);
+  if (req.file) {
+    newService.coverImage = {
+      filename: req.file.originalname,
+      path: req.file.path,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+    };}
 
   res.status(200).json({
     status: "success",
