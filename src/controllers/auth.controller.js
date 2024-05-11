@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+
+/* eslint-disable import/no-duplicates */
 import crypto from "node:crypto";
 import AppError from "../utils/app.error.js";
 import Jwt from "../utils/jwt.js";
@@ -28,18 +30,8 @@ export const signUp = catchAsync(async (req, res, next) => {
     "role",
   );
 
-  //  const user = await User.create(userData, {});
 
-  const user = await User.create(userData,{
-    email: req.body.email,
-    name: req.body.name,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm,
-    photo: req.body.photo,
-    gender: req.body.gender,
-    role: req.body.role, // TODO: make sure this is removed in PROD.
-    passwordChangedAt: req.body.passwordChangedAt, // TODO: make sure this is removed in PROD.
-  });
+  const user = await User.create(userData);
 
   await sendToken(user, 201, res);
 });
@@ -59,6 +51,7 @@ export const login = catchAsync(async (req, res, next) => {
 
   user.password = undefined; // password is not sent in the response
 
+  
   await sendToken(user, 200, res);
 });
 
