@@ -4,10 +4,12 @@ import express from "express";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import path from "node:path"
+import cors from "cors"
 import AppError from "./src/utils/app.error.js";
 import globalErrorController from "./src/controllers/error.controller.js";
 import serviceRoute from "./src/routes/service.route.js";
 import userRoute from "./src/routes/user.route.js";
+
 
 const app = express();
 
@@ -17,6 +19,7 @@ const app = express();
 app.set('views', path.join('views'));
 app.set('view engine', 'ejs');
 
+app.use(cors())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
