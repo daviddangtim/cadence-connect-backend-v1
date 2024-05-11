@@ -32,7 +32,7 @@ export const signUp = catchAsync(async (req, res, next) => {
 
 
   const user = await User.create(userData);
-
+  
   await sendToken(user, 201, res);
 });
 
