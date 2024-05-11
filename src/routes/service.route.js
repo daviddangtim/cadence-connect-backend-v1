@@ -14,8 +14,8 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(protect,createService)
-   .get(protect, getAllServices);
+  .post(createService)
+   .get(getAllServices);
 router.route("/:id").get(getService).patch(updateService).delete(deleteService);
 
 export default router;
