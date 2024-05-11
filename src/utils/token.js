@@ -13,8 +13,8 @@ export default async (user, statusCode, res) => {
     data: { user },
   });
 
-  res.cookie("jwt", token, {
-    httpOnly: true,
-    maxAge: 15 * 24 *60 *60 *1000,
-});
+//   // res.cookie("jwt", token, {
+//   //   httpOnly: true,
+//   //   maxAge: 15 * 24 *60 *60 *1000,
+// });
 };
