@@ -11,6 +11,8 @@ import filterObject from "../utils/filterObject.js";
 const { JWT_EXPIRES_IN, JWT_SECRET } = process.env;
 const jwt = new Jwt(JWT_SECRET, JWT_EXPIRES_IN);
 
+
+
 export const signUp = catchAsync(async (req, res, next) => {
   if (await User.findOne({ email: req.body.email }).lean()) {
     return next(new AppError("User already exists", 400));
