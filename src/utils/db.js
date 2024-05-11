@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import mongoose from "mongoose";
 
 export default async (options = { local: true }) => {

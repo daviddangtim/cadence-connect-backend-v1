@@ -1,3 +1,9 @@
+/* eslint-disable prettier/prettier */
+
+/* eslint-disable node/no-unsupported-features/es-syntax */
+
+/* eslint-disable no-unused-vars */
+
 import AppError from "../utils/app.error.js";
 import AppQueries from "../utils/app.queries.js";
 import catchAsync from "../utils/catch.async.js";
@@ -22,7 +28,7 @@ export const createService = catchAsync(async (req, res, next) => {
     "schedule",
     "summary",
   );
-  const newService = await Service.create(serviceData).exec();
+  const newService = await Service.create(serviceData);
 
   res.status(200).json({
     status: "success",
@@ -54,7 +60,8 @@ export const updateService = catchAsync(async (req, res, next) => {
   const updatedFields = { ...req.body };
 
   // removing fields that should not be updated by the client
-  excludedFields.forEach((field) => delete updatedFields[field]);
+  // biome-ignore lint/complexity/noForEach: <explanation>
+    excludedFields.forEach((field) => delete updatedFields[field]);
 
   const updatedService = await Service.findByIdAndUpdate(id, updatedFields, {
     includeResultMetadata: true,

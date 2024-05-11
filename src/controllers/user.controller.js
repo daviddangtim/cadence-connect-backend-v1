@@ -1,14 +1,11 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable import/prefer-default-export */
 import User from "../models/user.model.js";
+import catchAsync from "../utils/catch.async.js";
 
-const text = (fn) => (req, res, next) => fn(req, res, next).catch(next);
 
-export const textUser = (req, res, next) => {
-  function sample(req, res, next) {}
 
-  text((sample, req, res, next));
-};
-
-export const getUser = text(async (req, res, next) => {
+export const getUser = catchAsync(async (req, res, next) => {
   try {
     const user = await User.findById(req.body.id);
 

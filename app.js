@@ -1,12 +1,19 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable import/no-extraneous-dependencies */
 import express from "express";
 import bodyParser from "body-parser";
 import morgan from "morgan";
+
 import AppError from "./src/utils/app.error.js";
 import globalErrorController from "./src/controllers/error.controller.js";
 import serviceRoute from "./src/routes/service.route.js";
 import userRoute from "./src/routes/user.route.js";
 
 const app = express();
+
+
+
+app.set("view engine","ejs");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

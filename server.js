@@ -41,7 +41,7 @@ const startServer = async (ev, listener) => {
 
 (async () => {
   try {
-    await connectDb({ local: true });
+    await connectDb({ local: false });
     await startServer();
   } catch (err) {
     console.error("💥💥💥 Error initializing server 💥💥💥");

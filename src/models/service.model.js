@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+
 import mongoose from "mongoose";
 import slugify from "slugify";
 import pointSchema from "./point.schema.js";
@@ -12,7 +14,7 @@ const serviceSchema = new mongoose.Schema(
       type: [String],
       required: [true, "A category is required"],
       validate: {
-        validator: function (value) {
+        validator: (value) => {
           const values = [
             "wedding",
             "parties and celebration",
@@ -30,7 +32,7 @@ const serviceSchema = new mongoose.Schema(
     },
     coverImage: {
       type: String,
-      required: [true, "A cover image is required"],
+      required: [false, "A cover image is required"],
       trim: true,
     },
     description: {
@@ -46,7 +48,7 @@ const serviceSchema = new mongoose.Schema(
     images: [String],
     location: {
       type: pointSchema,
-      required: [true, "A location is required"],
+      required: [false, "A location is required"],
       index: "2dsphere",
     },
     maxBudget: {

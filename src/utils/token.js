@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import Jwt from "./jwt.js";
 
 const { JWT_EXPIRES_IN, JWT_SECRET } = process.env;

@@ -1,4 +1,5 @@
-import crypto from "crypto";
+/* eslint-disable prettier/prettier */
+import crypto from "node:crypto";
 import AppError from "../utils/app.error.js";
 import Jwt from "../utils/jwt.js";
 import catchAsync from "../utils/catch.async.js";
@@ -25,9 +26,9 @@ export const signUp = catchAsync(async (req, res, next) => {
     "role",
   );
 
-  const user = await User.create(userData, {});
+  //  const user = await User.create(userData, {});
 
-  const user = await User.create({
+  const user = await User.create(userData,{
     email: req.body.email,
     name: req.body.name,
     password: req.body.password,
@@ -63,6 +64,7 @@ export const protect = catchAsync(async (req, res, next) => {
   let token;
   const { authorization } = req.headers;
 
+  // biome-ignore lint/complexity/useOptionalChain: <explanation>
   if (authorization && authorization.startsWith("Bearer")) {
     token = authorization.split(" ")[1];
   }
@@ -97,7 +99,7 @@ export const restrictTo =
   (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
-        new AppError(`You are not permitted to perform this action`, 403),
+        new AppError("You are not permitted to perform this action", 403),
       );
     }
     next();

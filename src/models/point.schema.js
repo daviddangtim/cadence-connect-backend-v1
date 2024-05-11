@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import mongoose from "mongoose";
 
 const pointSchema = new mongoose.Schema({

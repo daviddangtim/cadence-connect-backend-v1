@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import express from "express";
 import {
   createService,
@@ -12,7 +13,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(createService)
+  .post(createService,)
   .get(protect, restrictTo("admin", "client"), getAllServices);
 router.route("/:id").get(getService).patch(updateService).delete(deleteService);
 

@@ -1,7 +1,9 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-console */
 import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 const userSchema = new mongoose.Schema(
   {
@@ -15,7 +17,7 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      required: [true, "Gender is required"],
+      required: [false, "Gender is required"],
       enum: {
         values: ["male", "female"],
       },
@@ -76,6 +78,7 @@ userSchema.pre("save", function (next) {
   next();
 });
 
+// biome-ignore lint/complexity/useArrowFunction: <explanation>
 userSchema.methods.comparePassword = async function (
   plaintextPassword,
   hashedPassword,
@@ -85,6 +88,7 @@ userSchema.methods.comparePassword = async function (
 
 userSchema.methods.passwordChangedAfterJwt = function (jwtIsa) {
   if (!this.passwordChangedAt) return false;
+  // biome-ignore lint/style/useNumberNamespace: <explanation>
   const passwordIsa = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
 
   // return true when passworIsa is greater than jwtIas
